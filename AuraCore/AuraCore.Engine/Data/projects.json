@@ -1,0 +1,37 @@
+[
+  {
+    "ProjectName": "Project Stockholm",
+    "ClientName": "Nordic Logistics Group",
+    "Revenue": 250000.00,
+    "AssignedEmployees": ["Ozan Onder", "Defne Yilmaz", "James Chen", "Lars Svensson"],
+    "Summary": "A logistics optimization project for a Nordic client focused on cloud-native architecture."
+  },
+  {
+    "ProjectName": "Project Bosphorus",
+    "ClientName": "Istanbul Tech Hub",
+    "Revenue": 120000.00,
+    "AssignedEmployees": ["Ozan Onder", "Sarah Miller", "Anya Petrova"],
+    "Summary": "Modernizing a tech hub platform using microservices and advanced UI/UX."
+  },
+  {
+    "ProjectName": "Internal Refresh",
+    "ClientName": "Aura-Core Internal",
+    "Revenue": 0.00,
+    "AssignedEmployees": ["Lars Svensson", "Sarah Miller", "Hakan Demir"],
+    "Summary": "In-house update for Aura-Core's internal employee engagement tools."
+  },
+  {
+    "ProjectName": "Data Insights 2026",
+    "ClientName": "Global Retail Corp",
+    "Revenue": 450000.00,
+    "AssignedEmployees": ["Elena Rodriguez", "James Chen", "Defne Yilmaz"],
+    "Summary": "Enterprise data analytics and machine learning project for a global retail leader."
+  },
+  {
+    "ProjectName": "Edge Computing Alpha",
+    "ClientName": "Euro Telecom",
+    "Revenue": 85000.00,
+    "AssignedEmployees": ["Anya Petrova", "Ozan Onder", "Hakan Demir"],
+    "Summary": "A research-focused project implementing edge computing nodes for telecommunications."
+  }
+]
