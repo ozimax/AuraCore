@@ -1,0 +1,13 @@
+bin/
+obj/
+.vs/
+.vscode/
+.dotnet/
+
+*.user
+*.suo
+*.db
+*.log
+
+appsettings.Development.json
+secrets.json

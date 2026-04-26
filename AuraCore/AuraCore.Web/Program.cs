@@ -1,23 +1,35 @@
+using AuraCore.Engine.Configuration;
+using AuraCore.Engine.Extensions;
+using AuraCore.Engine.Services;
 using AuraCore.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddAuraCoreEngine(new AuraCoreOptions
+{
+    AzureOpenAiEndpoint = builder.Configuration["AzureOpenAI:Endpoint"] ?? "YOUR_ENDPOINT",
+    DatabasePath = Path.Combine(Path.GetTempPath(), "aura-core-data.db")
+});
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<DataInitializer>();
+    await initializer.InitializeAsync();
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
-
 app.UseAntiforgery();
 
 app.MapStaticAssets();
