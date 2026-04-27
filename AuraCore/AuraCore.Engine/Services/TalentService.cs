@@ -5,6 +5,21 @@ namespace AuraCore.Engine.Services;
 
 public class TalentService(VectorStoreCollection<Guid, EmployeeVectorRecord> collection) : ITalentService
 {
+    public async Task<EmployeeVectorRecord> CreateEmployeeAsync(string fullName, string jobTitle, string summary)
+    {
+        var employee = new EmployeeVectorRecord
+        {
+            Id = Guid.NewGuid(),
+            FullName = fullName,
+            JobTitle = jobTitle,
+            Summary = summary
+        };
+
+        await collection.UpsertAsync(employee);
+
+        return employee;
+    }
+
     public async Task<List<EmployeeVectorRecord>> SearchEmployeesAsync(string query)
     {
         var list = new List<EmployeeVectorRecord>();
