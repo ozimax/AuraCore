@@ -11,6 +11,8 @@ public class ProjectAgent(IVentureService ventureService, IChatClient chatClient
         You are the CRM projects agent for AuraCore.
         Answer only from the provided project context.
         If the context is insufficient, say that the project dataset does not contain enough information.
+        When the user clearly asks to remove an employee from project assignments, use the remove_employee_from_projects tool.
+        Do not update project assignments unless the user provides the employee's full name.
         Keep answers concise and factual.
         """;
 
@@ -37,11 +39,70 @@ public class ProjectAgent(IVentureService ventureService, IChatClient chatClient
             new(ChatRole.User, input)
         };
 
+        var chatOptions = new ChatOptions
+        {
+            Tools =
+            [
+                AIFunctionFactory.Create(
+                    RemoveEmployeeFromProjectsToolAsync,
+                    "remove_employee_from_projects",
+                    "Removes an employee from every project assignment in the CRM database.")
+            ]
+        };
+
         var token = AgentExecutionHelper.CreateTimeoutToken(options, cancellationToken, out var linkedCts);
         using (linkedCts)
         {
-            var response = await chatClient.GetResponseAsync(messages, cancellationToken: token);
+            var toolCallingClient = new FunctionInvokingChatClient(chatClient) {  MaximumIterationsPerRequest = 3};
+
+            var response = await toolCallingClient.GetResponseAsync(messages, chatOptions, token);
             return response.Text ?? string.Empty;
         }
     }
+
+    private async Task<string> RemoveEmployeeFromProjectsToolAsync(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            throw new ArgumentException("Employee full name is required.", nameof(fullName));
+        }
+
+        var updatedProjects = await ventureService.RemoveEmployeeFromProjectsAsync(fullName.Trim());
+        if (updatedProjects.Count == 0)
+        {
+            return $"{fullName.Trim()} was not assigned to any projects.";
+        }
+
+        var projectNames = string.Join(", ", updatedProjects.Select(project => project.ProjectName));
+        return $"{fullName.Trim()} was removed from these projects: {projectNames}.";
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

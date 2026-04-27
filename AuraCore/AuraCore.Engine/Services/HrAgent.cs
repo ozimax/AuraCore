@@ -14,10 +14,10 @@ public class HrAgent(ITalentService talentService, IChatClient chatClient, AuraC
         If the context is insufficient for a question, say that the HR dataset does not contain enough information.
         When the user clearly asks to add, create, or register a new employee, use the create_employee tool.
         Do not create an employee unless the user provides a full name, job title, and skills or summary.
+        When the user clearly asks to remove, delete, or offboard an employee, use the delete_employee tool.
+        Do not delete an employee unless the user provides the employee's full name.
         Keep answers concise and factual.
         """;
-
-
 
 
 
@@ -79,7 +79,11 @@ public class HrAgent(ITalentService talentService, IChatClient chatClient, AuraC
                 AIFunctionFactory.Create(
                     CreateEmployeeToolAsync,
                     "create_employee",
-                    "Creates a new employee record in the HR database. Use only when the user clearly asks to add, create, or register a new employee.")
+                    "Creates a new employee record in the HR database. Use only when the user clearly asks to add, create, or register a new employee."),
+                AIFunctionFactory.Create(
+                    DeleteEmployeeToolAsync,
+                    "delete_employee",
+                    "Deletes an employee record from the HR database. Use only when the user clearly asks to remove, delete, or offboard an employee.")
             ]
         };
 
@@ -87,23 +91,12 @@ public class HrAgent(ITalentService talentService, IChatClient chatClient, AuraC
         
         using (linkedCts)
         {
-            var toolCallingClient = new FunctionInvokingChatClient(chatClient)
-            {
-                MaximumIterationsPerRequest = 3
-            };
+            var toolCallingClient = new FunctionInvokingChatClient(chatClient) { MaximumIterationsPerRequest = 3 };
 
             var response = await toolCallingClient.GetResponseAsync(messages, chatOptions, token);
             return response.Text ?? string.Empty;
         }
     }
-
-
-
-
-
-
-
-
 
 
 
@@ -126,8 +119,23 @@ public class HrAgent(ITalentService talentService, IChatClient chatClient, AuraC
 
         return await talentService.CreateEmployeeAsync(fullName.Trim(), jobTitle.Trim(), summary.Trim());
     }
-}
 
+    private async Task<string> DeleteEmployeeToolAsync(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            throw new ArgumentException("Employee full name is required.", nameof(fullName));
+        }
+
+        var deletedEmployee = await talentService.DeleteEmployeeAsync(fullName.Trim());
+        if (deletedEmployee is null)
+        {
+            return $"No HR employee record was found for {fullName.Trim()}.";
+        }
+
+        return $"{deletedEmployee.FullName} was deleted from the HR database.";
+    }
+}
 
 
 

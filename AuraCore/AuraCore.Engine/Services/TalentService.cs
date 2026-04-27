@@ -20,6 +20,18 @@ public class TalentService(VectorStoreCollection<Guid, EmployeeVectorRecord> col
         return employee;
     }
 
+    public async Task<EmployeeVectorRecord?> DeleteEmployeeAsync(string fullName)
+    {
+        var employee = await FindEmployeeByFullNameAsync(fullName);
+        if (employee is null)
+        {
+            return null;
+        }
+
+        await collection.DeleteAsync(employee.Id);
+        return employee;
+    }
+
     public async Task<List<EmployeeVectorRecord>> SearchEmployeesAsync(string query)
     {
         var list = new List<EmployeeVectorRecord>();
@@ -30,6 +42,21 @@ public class TalentService(VectorStoreCollection<Guid, EmployeeVectorRecord> col
         }
         
         return list;
+    }
+
+    private async Task<EmployeeVectorRecord?> FindEmployeeByFullNameAsync(string fullName)
+    {
+        var employees = collection.GetAsync(item => true, top: 100);
+
+        await foreach (var employee in employees)
+        {
+            if (string.Equals(employee.FullName, fullName.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                return employee;
+            }
+        }
+
+        return null;
     }
 
 }

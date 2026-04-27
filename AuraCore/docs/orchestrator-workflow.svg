@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="820" viewBox="0 0 1240 820">
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#26313d"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 28px Arial, sans-serif; fill: #17202a; }
+      .note { font: 400 15px Arial, sans-serif; fill: #536170; }
+      .box { stroke-width: 2.2; rx: 8; }
+      .input { fill: #e9f5ff; stroke: #337ab7; }
+      .orch { fill: #fff2e6; stroke: #c56b25; }
+      .decision { fill: #f1edff; stroke: #7561c7; }
+      .hr { fill: #fff0f2; stroke: #c94f62; }
+      .project { fill: #eef8f6; stroke: #3f8f80; }
+      .llm { fill: #edf7ed; stroke: #4e9f50; }
+      .answer { fill: #eef2f7; stroke: #64748b; }
+      .text { font: 700 18px Arial, sans-serif; fill: #17202a; }
+      .sub { font: 400 13px Arial, sans-serif; fill: #44515f; }
+      .label { font: 700 12px Arial, sans-serif; fill: #26313d; }
+      .line { stroke: #26313d; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .thin { stroke: #26313d; stroke-width: 2.1; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1240" height="820"/>
+
+  <text class="title" x="50" y="54">OrchestratorAgent Workflow</text>
+  <text class="note" x="50" y="82">Clean view of how RunAsync routes requests to workflows and combines agent results.</text>
+
+  <rect class="box input" x="70" y="145" width="190" height="86"/>
+  <text class="text" x="123" y="181">User Input</text>
+  <text class="sub" x="105" y="206">console question</text>
+
+  <rect class="box orch" x="360" y="145" width="230" height="86"/>
+  <text class="text" x="414" y="181">RunAsync</text>
+  <text class="sub" x="399" y="206">orchestrator entry</text>
+
+  <rect class="box llm" x="690" y="145" width="260" height="86"/>
+  <text class="text" x="748" y="181">ChooseWorkflow</text>
+  <text class="sub" x="735" y="206">LLM returns JSON enum</text>
+
+  <rect class="box decision" x="1040" y="145" width="140" height="86"/>
+  <text class="text" x="1071" y="181">Workflow</text>
+  <text class="sub" x="1069" y="206">parsed enum</text>
+
+  <rect class="box hr" x="90" y="390" width="230" height="96"/>
+  <text class="text" x="164" y="428">HrAgent</text>
+  <text class="sub" x="138" y="454">HR query answer</text>
+  <text class="sub" x="124" y="472">or delete_employee tool</text>
+
+  <rect class="box project" x="405" y="390" width="260" height="96"/>
+  <text class="text" x="478" y="428">ProjectAgent</text>
+  <text class="sub" x="459" y="454">project query answer</text>
+  <text class="sub" x="431" y="472">or remove assignments tool</text>
+
+  <rect class="box llm" x="755" y="390" width="250" height="96"/>
+  <text class="text" x="810" y="428">Synthesis</text>
+  <text class="sub" x="801" y="454">combines outputs</text>
+  <text class="sub" x="801" y="472">for Both or Delete</text>
+
+  <rect class="box answer" x="505" y="670" width="230" height="76"/>
+  <text class="text" x="562" y="713">Final Answer</text>
+
+  <path class="line" d="M260 188 H360"/>
+  <path class="line" d="M590 188 H690"/>
+  <path class="line" d="M950 188 H1040"/>
+
+  <path class="thin" d="M1110 231 V300 H205 V390"/>
+  <text class="label" x="222" y="322">HR_QUERY</text>
+
+  <path class="thin" d="M1110 231 V330 H535 V390"/>
+  <text class="label" x="552" y="352">PROJECT_QUERY</text>
+
+  <path class="thin" d="M1110 231 V360 H880 V390"/>
+  <text class="label" x="897" y="382">BOTH_QUERY</text>
+
+  <path class="thin" d="M1110 231 V565 H205 V486"/>
+  <text class="label" x="230" y="548">REMOVE_EMPLOYEE step 1</text>
+
+  <path class="thin" d="M320 438 H405"/>
+  <text class="label" x="336" y="423">step 2</text>
+
+  <path class="thin" d="M665 438 H755"/>
+  <text class="label" x="690" y="423">result</text>
+
+  <path class="thin" d="M205 486 V615 H620 V670"/>
+  <text class="label" x="260" y="638">HR-only answer</text>
+
+  <path class="thin" d="M535 486 V640 H620 V670"/>
+  <text class="label" x="548" y="626">Project-only answer</text>
+
+  <path class="thin" d="M880 486 V615 H650 V670"/>
+  <text class="label" x="706" y="638">combined answer</text>
+</svg>
