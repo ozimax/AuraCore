@@ -53,34 +53,7 @@ dotnet run --project .\AuraCore.Console\AuraCore.Console.csproj
 
 The first initialization loads `AuraCore.Engine\Data\employees.json` and `AuraCore.Engine\Data\projects.json`, creates embeddings, and stores them in a SQLite database under the temp folder by default.
 
-## Deploy to Azure App Service
 
-Publish and package the web app:
-
-```powershell
-dotnet publish .\AuraCore.Web\AuraCore.Web.csproj -c Release -o .\publish
-Compress-Archive -Path .\publish\* -DestinationPath .\auracore-web.zip -Force
-```
-
-Deploy to the existing App Service:
-
-```powershell
-az webapp deploy `
-  --resource-group app-grp `
-  --name Projectauracore `
-  --src-path .\auracore-web.zip `
-  --type zip
-```
-
-Restart if needed:
-
-```powershell
-az webapp restart --resource-group app-grp --name Projectauracore
-```
-
-## Generated Files
-
-The repository ignores generated deployment and local emulator files:
 
 - `publish/`
 - `*.zip`
