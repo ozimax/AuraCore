@@ -8,6 +8,14 @@ AuraCore is a .NET 10 agent demo that routes HR and project questions through an
 - `AuraCore.Web` is the Blazor web app for chatting with the orchestrator.
 - `AuraCore.Console` is a console runner for local testing.
 
+## Agents
+
+AuraCore uses three main agents:
+
+- `OrchestratorAgent` receives the user question, decides whether it needs HR data, project data, or both, and combines the specialist responses into one answer.
+- `HrAgent` answers employee-focused questions. It searches the HR vector collection seeded from `employees.json` and can list or summarize employees by role, skills, title, and related profile details.
+- `ProjectAgent` answers project-focused questions. It searches the project vector collection seeded from `projects.json` and can list projects, answer delivery/client/revenue questions, create project records when enough details are provided, and remove an employee from project assignments.
+
 ## Requirements
 
 - .NET SDK 10
