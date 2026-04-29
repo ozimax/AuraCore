@@ -1,0 +1,156 @@
+@page "/"
+@rendermode InteractiveServer
+@using AuraCore.Engine.Services
+@using AuraCore.Web.Services
+@implements IDisposable
+@inject IOrchestratorAgent Orchestrator
+@inject IAgentActivitySink ActivitySink
+@inject AuraCoreInitializationService InitializationService
+
+<PageTitle>Agent Chat</PageTitle>
+
+<h1>AuraCore Agent Chat</h1>
+
+@if (isInitializing || initializationError is not null)
+{
+    <section class="chat-shell" aria-label="AuraCore initialization console">
+        <div class="console-window initialization-window" aria-live="polite">
+            <div class="console-entry @(initializationError is null ? "system" : "error")">
+                <span class="console-prompt">@(initializationError is null ? "aura" : "error")</span>
+                <span class="console-text">@(initializationError ?? "Data is being initialized...")</span>
+            </div>
+        </div>
+    </section>
+}
+else
+{
+    <section class="chat-shell" aria-label="AuraCore agent console">
+        <div class="console-window" aria-live="polite">
+            @foreach (var entry in entries)
+            {
+                <div class="console-entry @entry.Kind">
+                    <span class="console-prompt">@entry.Prompt</span>
+                    <span class="console-text">@entry.Text</span>
+                </div>
+            }
+        </div>
+
+        <form class="chat-input" @onsubmit="SendAsync" @onsubmit:preventDefault>
+            <textarea class="form-control"
+                      rows="3"
+                      placeholder="Ask about employees, projects, staffing, or removals..."
+                      @bind="message"
+                      @bind:event="oninput"
+                      disabled="@isBusy"></textarea>
+            <button class="btn btn-primary" type="submit" disabled="@(!CanSend)">
+                @(isBusy ? "Running..." : "Send")
+            </button>
+        </form>
+    </section>
+}
+
+@code {
+    private readonly List<ConsoleEntry> entries = [];
+
+    private string? message;
+    private string? initializationError;
+    private bool isBusy;
+    private bool isInitializing = true;
+
+    private bool CanSend => !isBusy && !string.IsNullOrWhiteSpace(message);
+
+    protected override void OnInitialized()
+    {
+        ActivitySink.ActivityWritten += OnActivityWritten;
+        isInitializing = !InitializationService.IsInitialized;
+
+        if (!isInitializing)
+        {
+            AddReadyMessage();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || InitializationService.IsInitialized)
+        {
+            return;
+        }
+
+        try
+        {
+            await InitializationService.EnsureInitializedAsync();
+            AddReadyMessage();
+        }
+        catch (Exception ex)
+        {
+            initializationError = $"Data initialization failed: {ex.Message}";
+        }
+        finally
+        {
+            isInitializing = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task SendAsync()
+    {
+        if (!CanSend)
+        {
+            return;
+        }
+
+        var question = message!.Trim();
+        message = string.Empty;
+        entries.Add(new ConsoleEntry("user", "you", question));
+        var pendingEntry = new ConsoleEntry("system", "aura", "Running orchestrator workflow...");
+        entries.Add(pendingEntry);
+        isBusy = true;
+
+        try
+        {
+            var answer = await Orchestrator.RunAsync(question);
+            entries.Remove(pendingEntry);
+            entries.Add(new ConsoleEntry("assistant", "agent", string.IsNullOrWhiteSpace(answer)
+                ? "The orchestrator returned an empty response."
+                : answer));
+        }
+        catch (Exception ex)
+        {
+            entries.Remove(pendingEntry);
+            entries.Add(new ConsoleEntry("error", "error", ex.Message));
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private void OnActivityWritten(AgentActivity activity)
+    {
+        entries.Add(new ConsoleEntry("agent-call", activity.Source, activity.Message));
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void AddReadyMessage()
+    {
+        if (entries.Count == 0)
+        {
+            entries.Add(new ConsoleEntry("system", "aura", "Connected to the AuraCore orchestrator. Ask a question to route it through the agents."));
+        }
+    }
+
+    public void Dispose()
+    {
+        ActivitySink.ActivityWritten -= OnActivityWritten;
+    }
+
+    private sealed class ConsoleEntry(string kind, string prompt, string text)
+    {
+        public string Kind { get; } = kind;
+
+        public string Prompt { get; } = prompt;
+
+        public string Text { get; } = text;
+    }
+}

@@ -11,4 +11,15 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <Target Name="CopySqliteVecNativeExtension" AfterTargets="Publish">
+    <ItemGroup>
+      <SqliteVecNativeExtension Include="$(PublishDir)runtimes\win-x64\native\vec0.dll" Condition="Exists('$(PublishDir)runtimes\win-x64\native\vec0.dll')" />
+      <SqliteVecNativeExtension Include="$(PublishDir)runtimes\win-x64\native\e_sqlite3.dll" Condition="Exists('$(PublishDir)runtimes\win-x64\native\e_sqlite3.dll')" />
+      <SqliteVecNativeExtension Include="$(PublishDir)runtimes\linux-x64\native\vec0.so" Condition="Exists('$(PublishDir)runtimes\linux-x64\native\vec0.so')" />
+      <SqliteVecNativeExtension Include="$(PublishDir)runtimes\linux-x64\native\libe_sqlite3.so" Condition="Exists('$(PublishDir)runtimes\linux-x64\native\libe_sqlite3.so')" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(SqliteVecNativeExtension)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>

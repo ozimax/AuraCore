@@ -5,7 +5,10 @@ using Microsoft.Extensions.AI;
 
 namespace AuraCore.Engine.Services;
 
-public class HrAgent(ITalentService talentService, IChatClient chatClient, AuraCoreOptions options) : IHrAgent
+public class HrAgent(
+    ITalentService talentService,
+    IChatClient chatClient,
+    AuraCoreOptions options) : IHrAgent
 {
     private const string Instructions =
         """
@@ -20,39 +23,13 @@ public class HrAgent(ITalentService talentService, IChatClient chatClient, AuraC
         """;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public async Task<string> RunAsync(string input, CancellationToken cancellationToken = default)
     {
-        Console.WriteLine("****HR AGENT CALLED****");
+        if (IsEmployeeListRequest(input))
+        {
+            var allEmployees = await talentService.GetEmployeesAsync();
+            return FormatEmployeeList(allEmployees);
+        }
 
         var employees = await talentService.SearchEmployeesAsync(input);
 
@@ -135,11 +112,36 @@ public class HrAgent(ITalentService talentService, IChatClient chatClient, AuraC
 
         return $"{deletedEmployee.FullName} was deleted from the HR database.";
     }
+
+    private static bool IsEmployeeListRequest(string input)
+    {
+        var normalizedInput = input.ToLowerInvariant();
+
+        return ContainsAny(normalizedInput, "all", "list", "show", "everyone", "employees", "staff", "people")
+            && ContainsAny(normalizedInput, "employee", "employees", "staff", "people", "everyone");
+    }
+
+    private static string FormatEmployeeList(IReadOnlyCollection<EmployeeVectorRecord> employees)
+    {
+        if (employees.Count == 0)
+        {
+            return "There are no employees in the HR dataset.";
+        }
+
+        var response = new StringBuilder();
+        response.AppendLine($"Employees ({employees.Count}):");
+
+        foreach (var employee in employees)
+        {
+            response.AppendLine($"- {employee.FullName} - {employee.JobTitle}: {employee.Summary}");
+        }
+
+        return response.ToString().TrimEnd();
+    }
+
+    private static bool ContainsAny(string input, params string[] terms) =>
+        terms.Any(term => input.Contains(term, StringComparison.OrdinalIgnoreCase));
 }
-
-
-
-
 
 
 

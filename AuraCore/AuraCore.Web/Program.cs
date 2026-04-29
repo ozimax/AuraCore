@@ -2,33 +2,33 @@ using AuraCore.Engine.Configuration;
 using AuraCore.Engine.Extensions;
 using AuraCore.Engine.Services;
 using AuraCore.Web.Components;
+using AuraCore.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuraCoreEngine(new AuraCoreOptions
 {
-    AzureOpenAiEndpoint = builder.Configuration["AzureOpenAI:Endpoint"] ?? "YOUR_ENDPOINT",
+    AzureOpenAiEndpoint = builder.Configuration["AzureOpenAI:Endpoint"]
+        ?? Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")
+        ?? "https://ozan-onder-7267-resource.services.ai.azure.com",
+    ChatModel = builder.Configuration["AzureOpenAI:ChatModel"] ?? "gpt-4.1-nano",
     DatabasePath = Path.Combine(Path.GetTempPath(), "aura-core-data.db")
 });
+
+builder.Services.AddSingleton<AuraCoreInitializationService>();
+builder.Services.AddScoped<IAgentActivitySink, AgentActivityFeed>();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var initializer = scope.ServiceProvider.GetRequiredService<DataInitializer>();
-    await initializer.InitializeAsync();
-}
-
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/", createScopeForErrors: true);
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 app.UseAntiforgery();
 

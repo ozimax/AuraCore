@@ -5,7 +5,12 @@ using System.Text.Json.Serialization;
 
 namespace AuraCore.Engine.Services;
 
-public class OrchestratorAgent(IHrAgent hrAgent, IProjectAgent projectAgent, IChatClient chatClient, AuraCoreOptions options) : IOrchestratorAgent
+public class OrchestratorAgent(
+    IHrAgent hrAgent,
+    IProjectAgent projectAgent,
+    IChatClient chatClient,
+    AuraCoreOptions options,
+    IAgentActivitySink activitySink) : IOrchestratorAgent
 {
     private enum OrchestratorWorkflow
     {
@@ -30,6 +35,9 @@ public class OrchestratorAgent(IHrAgent hrAgent, IProjectAgent projectAgent, ICh
         REMOVE_EMPLOYEE - when the user asks to remove, delete, or offboard an employee from the company, HR database, staff, or employee records.
 
         Important:
+        If the user asks to create, add, register, delete, or remove a project, choose PROJECT_QUERY.
+        If the user asks to assign an employee to a project, choose PROJECT_QUERY.
+        If the user asks to remove an employee from project assignments only, choose PROJECT_QUERY.
         If the user asks who has a role or job title, choose HR_QUERY even when the title contains words like project.
         If the user asks about job titles, roles, or skills of people assigned to projects, choose BOTH_QUERY.
         Choose PROJECT_QUERY only when the user asks about project records, clients, revenue, delivery status, or project assignments.
@@ -46,6 +54,11 @@ public class OrchestratorAgent(IHrAgent hrAgent, IProjectAgent projectAgent, ICh
 
     public async Task<string> RunAsync(string input, CancellationToken cancellationToken = default)
     {
+        if (IsCapabilityRequest(input))
+        {
+            return CapabilitySummary;
+        }
+
         var workflow = await ChooseWorkflowAsync(input, cancellationToken);
 
         if (workflow == OrchestratorWorkflow.RemoveEmployee)
@@ -55,15 +68,19 @@ public class OrchestratorAgent(IHrAgent hrAgent, IProjectAgent projectAgent, ICh
 
         if (workflow == OrchestratorWorkflow.HrQuery)
         {
+            activitySink.Write("orchestrator", "Calling HR agent");
             return await hrAgent.RunAsync(input, cancellationToken);
         }
 
         if (workflow == OrchestratorWorkflow.ProjectQuery)
         {
+            activitySink.Write("orchestrator", "Calling project agent");
             return await projectAgent.RunAsync(input, cancellationToken);
         }
 
+        activitySink.Write("orchestrator", "Calling project agent");
         var projectResult = await projectAgent.RunAsync(input, cancellationToken);
+        activitySink.Write("orchestrator", "Calling HR agent");
         var hrResult = await hrAgent.RunAsync(
             $"User question: {input}\n\nRelevant project information:\n{projectResult}",
             cancellationToken);
@@ -88,7 +105,9 @@ public class OrchestratorAgent(IHrAgent hrAgent, IProjectAgent projectAgent, ICh
 
     private async Task<string> RunEmployeeRemovalWorkflowAsync(string input, CancellationToken cancellationToken)
     {
+        activitySink.Write("orchestrator", "Calling HR agent");
         var hrResult = await hrAgent.RunAsync(input, cancellationToken);
+        activitySink.Write("orchestrator", "Calling project agent");
         var projectResult = await projectAgent.RunAsync(
             $"Remove the employee named in this request from all project assignments. User request: {input}",
             cancellationToken);
@@ -152,6 +171,29 @@ public class OrchestratorAgent(IHrAgent hrAgent, IProjectAgent projectAgent, ICh
         }
     }
 
+    private const string CapabilitySummary =
+        """
+        I am the AuraCore orchestrator agent. I route your request to the right specialist agent and combine their answers when a question needs both HR and project context.
+
+        I can help with:
+        - Employee questions: list employees, search people by role or skills, and answer questions about employee records.
+        - Employee changes: create a new employee when you provide a full name, job title, and skills or summary; delete or offboard an employee by full name.
+        - Project questions: list projects, search projects by client, revenue, delivery details, or assigned employees.
+        - Project changes: create a project when you provide a project name, client name, revenue, and summary; delete a project by project name.
+        - Assignment updates: assign an employee to a project by project name and employee full name; remove an employee from project assignments when you provide the employee's full name.
+        """;
+
+    private static bool IsCapabilityRequest(string input)
+    {
+        var normalizedInput = input.ToLowerInvariant();
+
+        return ContainsAny(normalizedInput, "what can you do", "your capabilities", "what are your capabilities", "help", "about yourself", "who are you", "what do you do")
+            || (ContainsAny(normalizedInput, "agent", "orchestrator", "yourself")
+                && ContainsAny(normalizedInput, "capable", "capabilities", "do", "help", "about"));
+    }
+
+    private static bool ContainsAny(string input, params string[] terms) =>
+        terms.Any(term => input.Contains(term, StringComparison.OrdinalIgnoreCase));
 
     private sealed class WorkflowDecision
     {

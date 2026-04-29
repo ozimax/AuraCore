@@ -4,6 +4,8 @@ namespace AuraCore.Engine.Services;
 
 public interface ITalentService
 {
+    Task<List<EmployeeVectorRecord>> GetEmployeesAsync();
+
     Task<List<EmployeeVectorRecord>> SearchEmployeesAsync(string query);
 
     Task<EmployeeVectorRecord> CreateEmployeeAsync(string fullName, string jobTitle, string summary);

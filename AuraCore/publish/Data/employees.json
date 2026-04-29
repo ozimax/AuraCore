@@ -1,0 +1,42 @@
+[
+  {
+    "FullName": "Ozan Onder",
+    "JobTitle": "Senior Software Developer",
+    "Skills": "C#, .NET 10, Azure Cloud, System Architecture, Web App Design, SQL Server"
+  },
+  {
+    "FullName": "Lars Svensson",
+    "JobTitle": "Junior Developer",
+    "Skills": "HTML, CSS, JavaScript, React, Python, Automated Testing"
+  },
+  {
+    "FullName": "Defne Yilmaz",
+    "JobTitle": "Lead Project Manager",
+    "Skills": "Agile, Scrum, Stakeholder Management, Budgeting, Risk Assessment"
+  },
+  {
+    "FullName": "Sarah Miller",
+    "JobTitle": "Senior UI/UX Designer",
+    "Skills": "Figma, Adobe XD, Design Systems, User Research, Prototyping"
+  },
+  {
+    "FullName": "James Chen",
+    "JobTitle": "DevOps Engineer",
+    "Skills": "Docker, Kubernetes, CI/CD Pipelines, Terraform, Azure DevOps"
+  },
+  {
+    "FullName": "Elena Rodriguez",
+    "JobTitle": "Data Scientist",
+    "Skills": "Python, R, Machine Learning, PowerBI, SQL, Data Visualization"
+  },
+  {
+    "FullName": "Hakan Demir",
+    "JobTitle": "QA Engineer",
+    "Skills": "Selenium, Playwright, Integration Testing, C#, Manual Testing"
+  },
+  {
+    "FullName": "Anya Petrova",
+    "JobTitle": "Backend Developer",
+    "Skills": "Node.js, Go, PostgreSQL, Microservices, Redis"
+  }
+]

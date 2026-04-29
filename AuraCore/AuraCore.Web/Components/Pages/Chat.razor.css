@@ -1,0 +1,94 @@
+.chat-shell {
+    display: grid;
+    gap: 1rem;
+    max-width: 980px;
+}
+
+.console-window {
+    min-height: 24rem;
+    max-height: calc(100vh - 16rem);
+    overflow-y: auto;
+    border: 1px solid #1f2937;
+    border-radius: 6px;
+    background: #101418;
+    color: #d6e2ef;
+    padding: 1rem;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.console-entry {
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.35rem 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.console-prompt {
+    color: #8fb3d9;
+    font-weight: 700;
+}
+
+.console-prompt::after {
+    content: ">";
+    margin-left: 0.15rem;
+}
+
+.console-entry.user .console-prompt {
+    color: #87d37c;
+}
+
+.console-entry.assistant .console-prompt {
+    color: #f1c40f;
+}
+
+.console-entry.agent-call .console-prompt {
+    color: #7dd3fc;
+}
+
+.console-entry.agent-call .console-text {
+    color: #b9d7f0;
+}
+
+.console-entry.error .console-prompt,
+.console-entry.error .console-text {
+    color: #ff8a8a;
+}
+
+.initialization-window {
+    min-height: 10rem;
+}
+
+.chat-input {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: stretch;
+}
+
+.chat-input textarea {
+    resize: vertical;
+}
+
+.chat-input button {
+    min-width: 6.5rem;
+}
+
+@media (max-width: 640.98px) {
+    .console-window {
+        min-height: 20rem;
+        max-height: none;
+    }
+
+    .console-entry {
+        grid-template-columns: 1fr;
+        gap: 0.15rem;
+    }
+
+    .chat-input {
+        grid-template-columns: 1fr;
+    }
+}

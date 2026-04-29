@@ -5,6 +5,21 @@ namespace AuraCore.Engine.Services;
 
 public class TalentService(VectorStoreCollection<Guid, EmployeeVectorRecord> collection) : ITalentService
 {
+    public async Task<List<EmployeeVectorRecord>> GetEmployeesAsync()
+    {
+        var list = new List<EmployeeVectorRecord>();
+        var employees = collection.GetAsync(item => true, top: 100);
+
+        await foreach (var employee in employees)
+        {
+            list.Add(employee);
+        }
+
+        return list
+            .OrderBy(employee => employee.FullName)
+            .ToList();
+    }
+
     public async Task<EmployeeVectorRecord> CreateEmployeeAsync(string fullName, string jobTitle, string summary)
     {
         var employee = new EmployeeVectorRecord
@@ -46,9 +61,9 @@ public class TalentService(VectorStoreCollection<Guid, EmployeeVectorRecord> col
 
     private async Task<EmployeeVectorRecord?> FindEmployeeByFullNameAsync(string fullName)
     {
-        var employees = collection.GetAsync(item => true, top: 100);
+        var employees = await GetEmployeesAsync();
 
-        await foreach (var employee in employees)
+        foreach (var employee in employees)
         {
             if (string.Equals(employee.FullName, fullName.Trim(), StringComparison.OrdinalIgnoreCase))
             {

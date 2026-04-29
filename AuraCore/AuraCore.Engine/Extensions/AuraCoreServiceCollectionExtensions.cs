@@ -5,6 +5,7 @@ using Azure.AI.OpenAI;
 using Azure.Identity;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.SqliteVec;
 
@@ -47,6 +48,7 @@ public static class AuraCoreServiceCollectionExtensions
 
         services.AddScoped<ITalentService, TalentService>();
         services.AddScoped<IVentureService, VentureService>();
+        services.TryAddScoped<IAgentActivitySink, NullAgentActivitySink>();
         services.AddScoped<IHrAgent, HrAgent>();
         services.AddScoped<IProjectAgent, ProjectAgent>();
         services.AddScoped<IOrchestratorAgent, OrchestratorAgent>();
