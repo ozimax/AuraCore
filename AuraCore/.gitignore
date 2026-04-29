@@ -8,6 +8,11 @@ obj/
 *.suo
 *.db
 *.log
+*.zip
+
+publish/
+__azurite_db_*.json
+__queuestorage__/
 
 appsettings.Development.json
 secrets.json
